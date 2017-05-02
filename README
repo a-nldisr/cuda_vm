@@ -1,3 +1,7 @@
-# Ansible playbook to install CUDA.
+# Ansible playbook
 
+This playbook installs the NVIDIA drivers and tools to work with GPU's within a VM. 
+Currently its based on the Grid K2 setup im working with. 
+
+Goals of this playbooks is to place drivers, benchmarks, examples and test environment. 
 
