@@ -1,0 +1,69 @@
+---
+
+- name: 'Start playbook notification'
+  debug: msg="Started cuda.yml for {{ cuda_os_distribution }}"
+  tags:
+    - notify
+
+- name: 'Register presence of cuda installer'
+  stat:
+    path: /tmp/cuda_linux.run
+  register: cuda
+
+- name: 'Get CUDA installer'
+  get_url: 
+    url: "https://developer.nvidia.com/compute/cuda/{{ cuda_major_version }}.0/Prod2/local_installers/cuda_{{ cuda_major_version }}.{{ cuda_package_version }}_linux-run"
+    dest: /tmp/cuda_linux.run
+  become: true
+  tags:
+  - installer
+  - cuda
+
+- name: 'Install tools for build'
+  apt: 
+    name: "{{ item }}"
+  become: true
+  with_items:
+    - gcc 
+    - make 
+    - g++
+  tags:
+    - cuda
+    - tools
+
+- name: 'Install build essentials and dkms for builds'
+  apt: 
+    name: "{{ item }}"
+  become: true
+  with_items: 
+    - build-essential
+    - dkms
+  tags:
+    - cuda
+    - essentials
+
+- name: 'Install linux-headers'
+  action: shell apt-get install -y linux-headers-$(uname -r)
+  become: true
+  ignore_errors: True
+  tags:
+    - cuda
+    - linux-headers
+
+- name: 'Stop lightdm'
+  service: 
+    name: lightdm
+    enabled: no
+    state: stopped
+  become: true
+  tags:
+  - lightdm
+  - cuda
+
+- name: 'Run NVIDIA-Linux-x.run installer for Drivers, by using silent you accept the license'
+  command: "/tmp/cuda_linux.run --silent --samples --toolkit"
+  become: true
+  tags:
+    - run
+    - drivers
+  when: cuda.stat.exists == False

@@ -1,0 +1,86 @@
+---
+
+- name: 'Start playbook notification'
+  debug: msg="Started drivers.yml for {{ cuda_os_distribution }}"
+  tags:
+    - notify
+
+- name: 'Purge nvidia and libcuda packages'
+  apt:
+    name: "{{ item }}"
+    state: absent
+    purge: yes
+  with_items:
+    - nvidia-*
+    - libcuda1-*
+  tags:
+    - purge
+    - drivers
+  become: true
+
+- name: 'Install tools for build'
+  apt: 
+    name: "{{ item }}"
+  become: true
+  with_items:
+    - gcc 
+    - make 
+    - g++
+  tags:
+    - drivers
+    - tools
+
+- name: 'Install packages for drivers'
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - libglu1-mesa
+    - libxi-dev
+    - libxmu-dev
+    - libglu1-mesa-dev
+  tags:
+    - install
+    - drivers
+  become: true
+
+- name: 'Register presence of installer'
+  stat:
+    path:  /tmp/NVIDIA_linux.run
+  register: nvidia
+
+- name: 'Retrieve the Installer for the Drivers'
+  get_url: 
+    url: "http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_version }}/NVIDIA-Linux-x86_64-{{ driver_version }}.run"
+    dest: /tmp/NVIDIA_linux.run
+  become: true
+  tags:
+  - installer
+  - drivers
+  when: nvidia.stat.exists == False
+
+- name: 'Run NVIDIA-Linux-x.run installer for Drivers, by using silent mode you accept the license'
+  command: "sh /tmp/NVIDIA_linux.run -s"
+  become: true
+  tags:
+    - run
+    - drivers
+  when: nvidia.stat.exists == False
+
+- name: Restart server
+  command: sleep 2 && /sbin/reboot
+  async: 0
+  poll: 0
+  ignore_errors: true
+  tags:
+    - reboot
+  become: true
+  when: nvidia.stat.exists == False
+
+- name: 'Wait for VM to come back'
+  wait_for: >
+    host="{{ inventory_hostname }}"
+    state=started
+    port=22
+    delay=15
+    timeout=60
+  delegate_to: localhost

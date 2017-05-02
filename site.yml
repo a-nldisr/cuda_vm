@@ -1,0 +1,9 @@
+- hosts: gridk2
+  gather_facts: yes
+  remote_user: ubuntu
+  roles: 
+  - cuda_drivers_k2
+
+# Preparing for P100
+# - hosts: p100
+#   remote_user: ubuntu
