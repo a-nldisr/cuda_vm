@@ -66,13 +66,14 @@
     - drivers
   when: nvidia.stat.exists == False
 
-- name: Restart server
+- name: 'Restart server, without the sleep the connection closes to fast.'
   command: sleep 2 && /sbin/reboot
   async: 0
   poll: 0
   ignore_errors: true
   tags:
     - reboot
+    - drivers
   become: true
   when: nvidia.stat.exists == False
 
