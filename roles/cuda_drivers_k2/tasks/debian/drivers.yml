@@ -52,6 +52,7 @@
   get_url: 
     url: "http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_version }}/NVIDIA-Linux-x86_64-{{ driver_version }}.run"
     dest: /tmp/NVIDIA_linux.run
+    mode: a+x
   become: true
   tags:
   - installer
