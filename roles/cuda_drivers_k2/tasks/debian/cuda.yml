@@ -9,11 +9,15 @@
   stat:
     path: /tmp/cuda_linux.run
   register: cuda
+  tags: 
+  - cuda
+  - run
 
 - name: 'Get CUDA installer'
   get_url: 
     url: "https://developer.nvidia.com/compute/cuda/{{ cuda_major_version }}.0/Prod2/local_installers/cuda_{{ cuda_major_version }}.{{ cuda_package_version }}_linux-run"
     dest: /tmp/cuda_linux.run
+    mode: a+x
   become: true
   tags:
   - installer
@@ -43,7 +47,7 @@
     - essentials
 
 - name: 'Install linux-headers'
-  action: shell apt-get install -y linux-headers-$(uname -r)
+  action: shell apt install -y linux-headers-$(uname -r)
   become: true
   ignore_errors: True
   tags:
@@ -60,7 +64,7 @@
   - lightdm
   - cuda
 
-- name: 'Run NVIDIA-Linux-x.run installer for Drivers, by using silent you accept the license'
+- name: 'Run cuda_linux.run installer, by using silent you accept the license'
   command: "/tmp/cuda_linux.run --silent --samples --toolkit"
   become: true
   tags:
