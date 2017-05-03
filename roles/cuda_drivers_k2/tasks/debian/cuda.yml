@@ -71,3 +71,42 @@
     - run
     - cuda
   when: cuda.stat.exists == False
+
+- name: 'Correct the PATH'
+  lineinfile:
+    path: /etc/profile.d/nvidia.sh
+    regexp: '^PATH='
+    line: 'PATH=/usr/local/cuda-8.0/bin:$PATH'
+  tags: 
+    - cuda
+    - path
+
+- name: 'Correct the LD_LIBRARY_PATH'
+  lineinfile:
+    path: /etc/profile.d/nvidia.sh
+    regexp: '^LD_LIBRARY_PATH='
+    line: 'LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:$LD_LIBRARY_PATH'
+  tags: 
+    - cuda
+    - librarypath
+
+- name: 'Restart server, without the sleep the connection closes to fast.'
+  command: sleep 2 && /sbin/reboot
+  async: 0
+  poll: 0
+  ignore_errors: true
+  tags:
+    - reboot
+    - drivers
+  become: true
+  when: nvidia.stat.exists == False
+
+- name: 'Wait for VM to come back'
+  wait_for: >
+    host="{{ inventory_hostname }}"
+    state=started
+    port=22
+    delay=15
+    timeout=60
+  delegate_to: localhost
+
