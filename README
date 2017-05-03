@@ -5,3 +5,4 @@ Currently its based on the Grid K2 setup im working with.
 
 Goals of this playbooks is to place drivers, benchmarks, examples and test environment. 
 
+# Since packer sets up the VM with an apt update after its initial boot, please be aware that the first step can fail due to dpkg db being in use.
