@@ -86,9 +86,22 @@
     path: /etc/profile.d/nvidia.sh
     regexp: '^LD_LIBRARY_PATH='
     line: 'LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:$LD_LIBRARY_PATH'
+  become: true
   tags: 
     - cuda
-    - librarypath
+    - environment
+
+- name: "add extra_path to path"
+  lineinfile: >
+    dest=/etc/environment
+    state=present
+    backrefs=yes
+    regexp='PATH=(["]*)((?!.*?{{extra_path}}).*?)(["]*)$'
+    line="PATH=\1\2:{{extra_path}}\3"
+  become: true
+  tags: 
+    - cuda
+    - environment
 
 - name: 'Restart server, without the sleep the connection closes to fast.'
   command: sleep 2 && /sbin/reboot
@@ -100,6 +113,8 @@
     - drivers
   become: true
   when: nvidia.stat.exists == False
+  tags:
+    - reboot
 
 - name: 'Wait for VM to come back'
   wait_for: >
@@ -109,4 +124,5 @@
     delay=15
     timeout=60
   delegate_to: localhost
-
+  tags:
+    - reboot

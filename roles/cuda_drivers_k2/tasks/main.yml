@@ -1,5 +1,13 @@
 ---
 
+- name: Register K2
+  shell: lspci -mmnn| grep NVIDIA | grep 11bf | awk '{print $1}'
+  register: k2
+
+- name: Fail when stdout is empty
+  command: echo "Found K2"
+  failed_when: k2.stdout == ""
+
 - include: debian.yml
   when: ansible_os_family == "Debian"
 
