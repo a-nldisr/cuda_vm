@@ -1,0 +1,17 @@
+---
+
+# Distro information
+
+cuda_os_distribution: "{{ ansible_distribution | lower }}"
+ubuntu_version: "{{ ansible_distribution_version.split('.') | join('') }}"
+
+# Driver information
+
+card_type: tesla
+driver_version: 375.66
+cuda_toolkit_version: 8
+
+cuda_deb_url: http://us.download.nvidia.com/{{ card_type }}/{{ driver_version }}/nvidia-diag-driver-local-repo-{{ cuda_os_distribution }}{{ ubuntu_version }}_{{ driver_version }}-1_amd64.deb
+deb_file: nvidia-diag-driver-local-repo-{{ cuda_os_distribution }}{{ ubuntu_version }}_{{ driver_version }}-1_amd64.deb
+
+# Example url: http://us.download.nvidia.com/tesla/375.66/nvidia-diag-driver-local-repo-ubuntu1604_375.66-1_amd64.deb

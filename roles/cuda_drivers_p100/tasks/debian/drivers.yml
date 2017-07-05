@@ -1,0 +1,58 @@
+---
+
+- name: 'Start playbook notification'
+  debug: msg="Started drivers.yml for {{ cuda_os_distribution }}"
+  tags:
+    - notify
+
+- name: 'Purge nvidia and libcuda packages'
+  apt:
+    name: "{{ item }}"
+    state: absent
+    purge: yes
+  with_items:
+    - nvidia-*
+    - libcuda1-*
+  tags:
+    - drivers
+    - purge
+  become: true
+
+- name: 'Register presence of deb file'
+  stat:
+    path: /tmp/"{{ deb_file }}"
+  register: driver
+
+- name: 'Retrieve the Drivers deb package'
+  get_url: 
+    url: "{{ cuda_deb_url }}"
+    dest: /tmp/"{{ deb_file }}"
+    mode: a+x
+  become: true
+  tags:
+  - drivers
+  - download
+  when: driver.stat.exists == False
+
+- name: 'Install a .deb package'
+  apt:
+    deb: /tmp/"{{ deb_file }}"
+  tags:
+  - drivers
+  - install
+
+- name: 'Update all packages'
+  apt:
+    name: "*"
+    state: latest
+  tags:
+  - drivers
+  - update
+
+- name: 'Install cuda-drivers'
+  apt:
+    name: "cuda-drivers"
+    state: latest
+  tags: 
+  - drivers
+  - cuda_drivers

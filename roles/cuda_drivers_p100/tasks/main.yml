@@ -1,0 +1,13 @@
+---
+
+- name: "Register P100 presence"
+  shell: lspci -mmnn| grep NVIDIA | grep 15f7 | awk '{print $1}'
+  register: p100
+
+- name: "Fail when stdout is empty"
+  debug: echo "Found P100"
+  failed_when: p100.stdout == ""
+
+- include: debian.yml
+  when: ansible_os_family == "Debian"
+
