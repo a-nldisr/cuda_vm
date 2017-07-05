@@ -1,2 +1,4 @@
 site.retry
+nvidia_k2_drivers.retry
+nvidia_p100_drivers.retry
 inventory/test
