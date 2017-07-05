@@ -5,7 +5,7 @@
   register: p100
 
 - name: "Fail when stdout is empty"
-  debug: echo "Found P100"
+  debug: msg="Found P100"
   failed_when: p100.stdout == ""
 
 - include: debian.yml

@@ -20,13 +20,13 @@
 
 - name: 'Register presence of deb file'
   stat:
-    path: /tmp/"{{ deb_file }}"
+    path: /tmp/{{ deb_file }}
   register: driver
 
 - name: 'Retrieve the Drivers deb package'
   get_url: 
     url: "{{ cuda_deb_url }}"
-    dest: /tmp/"{{ deb_file }}"
+    dest: /tmp/{{ deb_file }}
     mode: a+x
   become: true
   tags:
@@ -37,22 +37,24 @@
 - name: 'Install a .deb package'
   apt:
     deb: /tmp/"{{ deb_file }}"
+  become: true
   tags:
   - drivers
   - install
 
-- name: 'Update all packages'
+- name: 'Update apt cache'
   apt:
-    name: "*"
-    state: latest
+    update_cache: yes
+  become: true
   tags:
   - drivers
-  - update
+  - apt_cache
 
 - name: 'Install cuda-drivers'
   apt:
     name: "cuda-drivers"
     state: latest
+  become: true
   tags: 
   - drivers
   - cuda_drivers
